@@ -86,27 +86,26 @@ function ViewImage() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-5xl flex-col px-6 py-8">
+    <main className="mx-auto flex min-h-screen max-w-3xl flex-col px-6 py-10">
       <div className="mb-6 flex items-center justify-between gap-4">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
           <ArrowLeft className="size-4" /> Upload your own
         </Link>
-        <Button onClick={download} disabled={downloading}>
+        <Button onClick={download} disabled={downloading} size="sm">
           {downloading ? <><Loader2 className="animate-spin" /> Preparing…</> : <><Download /> Download original</>}
         </Button>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-card/40 p-3 backdrop-blur"
-           style={{ boxShadow: "var(--shadow-elevated)" }}>
+      <div className="overflow-hidden rounded-md border border-border">
         <img
           src={publicUrl}
           alt={image.file_name}
-          className="mx-auto max-h-[80vh] w-auto rounded-lg"
+          className="mx-auto max-h-[80vh] w-auto"
         />
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
-        <span className="truncate font-medium text-foreground">{image.file_name}</span>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+        <span className="truncate text-foreground">{image.file_name}</span>
         <span>{formatBytes(image.size_bytes)} · {image.mime_type}</span>
       </div>
     </main>
