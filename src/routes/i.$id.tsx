@@ -3,23 +3,34 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Download, ArrowLeft, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { formatBytes } from "@/lib/expiration";
 
 export const Route = createFileRoute("/i/$id")({
   loader: async ({ params }) => {
     const { data, error } = await supabase
       .from("images")
-      .select("id, storage_path, file_name, mime_type, size_bytes, created_at")
+      .select("id, storage_path, file_name, mime_type, size_bytes, created_at, expires_at, revoked_at, deleted_at")
       .eq("id", params.id)
       .maybeSingle();
 
     if (error) throw error;
     if (!data) throw notFound();
 
+    const isInactive =
+      !!data.deleted_at ||
+      !!data.revoked_at ||
+      (!!data.expires_at && new Date(data.expires_at) < new Date());
+
+    if (isInactive) {
+      return { image: data, publicUrl: null as string | null, inactive: true as const };
+    }
+
     const { data: pub } = supabase.storage
       .from("shared-images")
       .getPublicUrl(data.storage_path);
 
-    return { image: data, publicUrl: pub.publicUrl };
+    return { image: data, publicUrl: pub.publicUrl, inactive: false as const };
   },
   component: ViewImage,
   errorComponent: ({ error, reset }) => {
@@ -43,34 +54,47 @@ export const Route = createFileRoute("/i/$id")({
     </main>
   ),
   head: ({ loaderData }) => ({
-    meta: loaderData
+    meta: loaderData && !loaderData.inactive
       ? [
           { title: `${loaderData.image.file_name} · Shared image` },
           { name: "description", content: "View and download the original full-quality image." },
           { property: "og:title", content: loaderData.image.file_name },
-          { property: "og:image", content: loaderData.publicUrl },
+          { property: "og:image", content: loaderData.publicUrl ?? "" },
           { name: "twitter:card", content: "summary_large_image" },
-          { name: "twitter:image", content: loaderData.publicUrl },
+          { name: "twitter:image", content: loaderData.publicUrl ?? "" },
         ]
-      : [],
+      : [{ title: "Link unavailable" }],
   }),
 });
 
-function formatBytes(b: number) {
-  if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
-  if (b < 1024 * 1024 * 1024) return `${(b / 1024 / 1024).toFixed(1)} MB`;
-  return `${(b / 1024 / 1024 / 1024).toFixed(2)} GB`;
-}
-
 function ViewImage() {
-  const { image, publicUrl } = Route.useLoaderData();
+  const data = Route.useLoaderData();
   const [downloading, setDownloading] = useState(false);
+
+  if (data.inactive) {
+    const reason =
+      data.image.deleted_at ? "deleted"
+      : data.image.revoked_at ? "revoked by the owner"
+      : "expired";
+    return (
+      <main className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center px-6 text-center">
+        <h1 className="text-2xl font-semibold">This link is no longer available</h1>
+        <p className="mt-2 text-sm text-muted-foreground">The image was {reason}.</p>
+        <Link to="/" className="mt-6"><Button>Upload your own</Button></Link>
+      </main>
+    );
+  }
+
+  const { image, publicUrl } = data;
 
   const download = async () => {
     setDownloading(true);
     try {
-      // Fetch as blob to force download with original filename (and bypass inline display)
-      const res = await fetch(publicUrl);
+      const res = await fetch(`/api/download/${image.id}`);
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || "Download failed");
+      }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -80,6 +104,8 @@ function ViewImage() {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Download failed");
     } finally {
       setDownloading(false);
     }
@@ -98,7 +124,7 @@ function ViewImage() {
 
       <div className="overflow-hidden rounded-md border border-border">
         <img
-          src={publicUrl}
+          src={publicUrl!}
           alt={image.file_name}
           className="mx-auto max-h-[80vh] w-auto"
         />

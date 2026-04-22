@@ -14,30 +14,125 @@ export type Database = {
   }
   public: {
     Tables: {
+      image_downloads: {
+        Row: {
+          bytes: number
+          created_at: string
+          id: string
+          image_id: string
+          ip_hash: string
+        }
+        Insert: {
+          bytes?: number
+          created_at?: string
+          id?: string
+          image_id: string
+          ip_hash: string
+        }
+        Update: {
+          bytes?: number
+          created_at?: string
+          id?: string
+          image_id?: string
+          ip_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "image_downloads_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "images"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       images: {
         Row: {
+          bytes_downloaded: number
           created_at: string
+          deleted_at: string | null
+          download_count: number
+          expires_at: string | null
           file_name: string
           id: string
           mime_type: string
+          revoked_at: string | null
           size_bytes: number
           storage_path: string
+          user_id: string | null
         }
         Insert: {
+          bytes_downloaded?: number
           created_at?: string
+          deleted_at?: string | null
+          download_count?: number
+          expires_at?: string | null
           file_name: string
           id?: string
           mime_type: string
+          revoked_at?: string | null
           size_bytes: number
           storage_path: string
+          user_id?: string | null
         }
         Update: {
+          bytes_downloaded?: number
           created_at?: string
+          deleted_at?: string | null
+          download_count?: number
+          expires_at?: string | null
           file_name?: string
           id?: string
           mime_type?: string
+          revoked_at?: string | null
           size_bytes?: number
           storage_path?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      upload_attempts: {
+        Row: {
+          created_at: string
+          id: string
+          ip_hash: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_hash: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_hash?: string
+          user_id?: string | null
         }
         Relationships: []
       }
