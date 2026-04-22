@@ -70,8 +70,7 @@ export const Route = createFileRoute("/api/download/$id")({
           bytes,
         });
 
-        // Increment counters atomically-ish (best-effort)
-        await supabaseAdmin.rpc as unknown; // no rpc — just do an update:
+        // Increment counters (best-effort; not atomic but fine for stats)
         const { data: cur } = await supabaseAdmin
           .from("images")
           .select("download_count, bytes_downloaded")
