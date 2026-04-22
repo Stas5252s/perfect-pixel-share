@@ -9,10 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as IIdRouteImport } from './routes/i.$id'
+import { Route as ApiUploadCheckRouteImport } from './routes/api/upload-check'
+import { Route as ApiDownloadIdRouteImport } from './routes/api/download.$id'
+import { Route as ApiPublicHooksCleanupRouteImport } from './routes/api/public/hooks/cleanup'
 
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -28,39 +37,99 @@ const IIdRoute = IIdRouteImport.update({
   path: '/i/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUploadCheckRoute = ApiUploadCheckRouteImport.update({
+  id: '/api/upload-check',
+  path: '/api/upload-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDownloadIdRoute = ApiDownloadIdRouteImport.update({
+  id: '/api/download/$id',
+  path: '/api/download/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksCleanupRoute = ApiPublicHooksCleanupRouteImport.update({
+  id: '/api/public/hooks/cleanup',
+  path: '/api/public/hooks/cleanup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/dashboard': typeof DashboardRoute
+  '/api/upload-check': typeof ApiUploadCheckRoute
   '/i/$id': typeof IIdRoute
+  '/api/download/$id': typeof ApiDownloadIdRoute
+  '/api/public/hooks/cleanup': typeof ApiPublicHooksCleanupRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/dashboard': typeof DashboardRoute
+  '/api/upload-check': typeof ApiUploadCheckRoute
   '/i/$id': typeof IIdRoute
+  '/api/download/$id': typeof ApiDownloadIdRoute
+  '/api/public/hooks/cleanup': typeof ApiPublicHooksCleanupRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/dashboard': typeof DashboardRoute
+  '/api/upload-check': typeof ApiUploadCheckRoute
   '/i/$id': typeof IIdRoute
+  '/api/download/$id': typeof ApiDownloadIdRoute
+  '/api/public/hooks/cleanup': typeof ApiPublicHooksCleanupRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/i/$id'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/api/upload-check'
+    | '/i/$id'
+    | '/api/download/$id'
+    | '/api/public/hooks/cleanup'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/i/$id'
-  id: '__root__' | '/' | '/auth' | '/i/$id'
+  to:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/api/upload-check'
+    | '/i/$id'
+    | '/api/download/$id'
+    | '/api/public/hooks/cleanup'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/api/upload-check'
+    | '/i/$id'
+    | '/api/download/$id'
+    | '/api/public/hooks/cleanup'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  DashboardRoute: typeof DashboardRoute
+  ApiUploadCheckRoute: typeof ApiUploadCheckRoute
   IIdRoute: typeof IIdRoute
+  ApiDownloadIdRoute: typeof ApiDownloadIdRoute
+  ApiPublicHooksCleanupRoute: typeof ApiPublicHooksCleanupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -82,13 +151,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/upload-check': {
+      id: '/api/upload-check'
+      path: '/api/upload-check'
+      fullPath: '/api/upload-check'
+      preLoaderRoute: typeof ApiUploadCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/download/$id': {
+      id: '/api/download/$id'
+      path: '/api/download/$id'
+      fullPath: '/api/download/$id'
+      preLoaderRoute: typeof ApiDownloadIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/cleanup': {
+      id: '/api/public/hooks/cleanup'
+      path: '/api/public/hooks/cleanup'
+      fullPath: '/api/public/hooks/cleanup'
+      preLoaderRoute: typeof ApiPublicHooksCleanupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  DashboardRoute: DashboardRoute,
+  ApiUploadCheckRoute: ApiUploadCheckRoute,
   IIdRoute: IIdRoute,
+  ApiDownloadIdRoute: ApiDownloadIdRoute,
+  ApiPublicHooksCleanupRoute: ApiPublicHooksCleanupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
