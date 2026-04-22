@@ -88,7 +88,11 @@ function Index() {
 
     try {
       // Server-side rate limit + attempt log
-      const rlRes = await fetch("/api/upload-check", { method: "POST" });
+      const { data: sess } = await supabase.auth.getSession();
+      const rlRes = await fetch("/api/upload-check", {
+        method: "POST",
+        headers: sess.session ? { Authorization: `Bearer ${sess.session.access_token}` } : {},
+      });
       if (!rlRes.ok) {
         const j = await rlRes.json().catch(() => ({}));
         throw new Error(j.error || "Upload not allowed right now.");
